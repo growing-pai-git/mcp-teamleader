@@ -1,0 +1,80 @@
+{
+  "manifest_version": "0.3",
+  "name": "growing-pai-mcp-teamleader",
+  "display_name": "Growing pAI — Teamleader",
+  "version": "1.0.0",
+  "description": "MCP server for Teamleader Focus CRM — manage contacts, companies, deals, tasks, events, invoices, quotations, projects and time tracking.",
+  "long_description": "Connects Claude to Teamleader Focus CRM. Each installer supplies their own Teamleader OAuth credentials (client ID, client secret, refresh token) — no credentials are bundled in this extension. Optionally unlock deals, invoices and quotations by setting an admin passphrase, and override financial defaults (ledger account, product category) used when creating invoices.",
+  "author": {
+    "name": "Growing Pai",
+    "email": "hello@growingpai.com"
+  },
+  "license": "MIT",
+  "keywords": ["mcp", "teamleader", "crm", "model-context-protocol", "ai", "claude"],
+  "privacy_policies": ["https://www.teamleader.eu/privacy-policy"],
+  "server": {
+    "type": "node",
+    "entry_point": "server/dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/server/dist/index.js"],
+      "env": {
+        "TEAMLEADER_CLIENT_ID": "${user_config.teamleader_client_id}",
+        "TEAMLEADER_CLIENT_SECRET": "${user_config.teamleader_client_secret}",
+        "TEAMLEADER_REFRESH_TOKEN": "${user_config.teamleader_refresh_token}",
+        "ADMIN": "${user_config.admin_passphrase}",
+        "TEAMLEADER_DEFAULT_LEDGER_ACCOUNT": "${user_config.default_ledger_account}",
+        "TEAMLEADER_DEFAULT_PRODUCT_CATEGORY_ID": "${user_config.default_product_category_id}"
+      }
+    }
+  },
+  "compatibility": {
+    "claude_desktop": ">=0.10.0",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=20.0.0"
+    }
+  },
+  "user_config": {
+    "teamleader_client_id": {
+      "type": "string",
+      "title": "Teamleader Client ID",
+      "description": "REQUIRED. OAuth2 client ID for your own Teamleader Focus app.",
+      "sensitive": true,
+      "required": true
+    },
+    "teamleader_client_secret": {
+      "type": "string",
+      "title": "Teamleader Client Secret",
+      "description": "REQUIRED. OAuth2 client secret for your own Teamleader Focus app.",
+      "sensitive": true,
+      "required": true
+    },
+    "teamleader_refresh_token": {
+      "type": "string",
+      "title": "Teamleader Refresh Token",
+      "description": "REQUIRED. OAuth2 refresh token for your own Teamleader Focus account. Generate one with the scripts/get-refresh-token.mjs helper in the source repo, or via your own OAuth flow.",
+      "sensitive": true,
+      "required": true
+    },
+    "admin_passphrase": {
+      "type": "string",
+      "title": "Admin Passphrase (optional)",
+      "description": "OPTIONAL. Unlocks financially sensitive tools — deals, invoices and quotations. Leave blank to hide those tools entirely for this session.",
+      "sensitive": true,
+      "required": false
+    },
+    "default_ledger_account": {
+      "type": "string",
+      "title": "Default Ledger Account (optional)",
+      "description": "OPTIONAL. Default ledger/rekening account number used when creating invoices. Falls back to 700000 if left blank.",
+      "required": false
+    },
+    "default_product_category_id": {
+      "type": "string",
+      "title": "Default Product Category ID (optional)",
+      "description": "OPTIONAL. Teamleader product category ID used as a default when none is specified.",
+      "required": false
+    }
+  }
+}

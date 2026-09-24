@@ -39,6 +39,18 @@ You need a **Teamleader Focus** account with API access:
 1. Unzip the folder anywhere on your machine — dependencies are bundled, no `npm install` needed.
 2. Point your MCP client at `dist/index.js` directly (see the Claude Desktop / Cursor examples below, using `node` as the command and the full path to `dist/index.js` as the argument).
 
+### Build your own Claude Desktop bundle (.mcpb)
+
+The extension manifest lives in [`mcpb/manifest.json`](./mcpb/manifest.json). To package your own `growing-pai-teamleader.mcpb` from source:
+
+```bash
+npm ci
+npm run build
+node scripts/build-mcpb.mjs
+```
+
+The script stages the bundle in `build/mcpb/` (manifest, compiled `dist/`, production dependencies only) and packs it with the official [`@anthropic-ai/mcpb`](https://www.npmjs.com/package/@anthropic-ai/mcpb) CLI. No credentials are baked in — each installer enters their own in Claude Desktop.
+
 ## Configuration
 
 ### Environment Variables

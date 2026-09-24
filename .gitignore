@@ -5,3 +5,4 @@ node_modules/
 !.env.example
 loadEnv.ps1
 .claude/settings.local.json
+build/
