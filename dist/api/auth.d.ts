@@ -30,6 +30,12 @@ export declare class TeamleaderAuth {
     private readonly tokenFile;
     /** Legacy cache location (bare home dir, default permissions). */
     private readonly legacyTokenFile;
+    /**
+     * In-flight refresh, shared by concurrent callers. Teamleader rotates the
+     * refresh token on every use, so two parallel refreshes would have the
+     * second one send an already-invalidated token.
+     */
+    private refreshing;
     constructor(config: TeamleaderAuthConfig);
     /** Get a valid access token, refreshing if necessary. */
     getAccessToken(): Promise<string>;

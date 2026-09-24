@@ -58,6 +58,12 @@ export class TeamleaderAuth {
   private readonly tokenFile: string;
   /** Legacy cache location (bare home dir, default permissions). */
   private readonly legacyTokenFile: string;
+  /**
+   * In-flight refresh, shared by concurrent callers. Teamleader rotates the
+   * refresh token on every use, so two parallel refreshes would have the
+   * second one send an already-invalidated token.
+   */
+  private refreshing: Promise<void> | null = null;
 
   constructor(config: TeamleaderAuthConfig) {
     this.config = { ...config };
@@ -76,7 +82,10 @@ export class TeamleaderAuth {
     if (this.isTokenValid()) {
       return this.config.accessToken!;
     }
-    await this.refreshAccessToken();
+    this.refreshing ??= this.refreshAccessToken().finally(() => {
+      this.refreshing = null;
+    });
+    await this.refreshing;
     return this.config.accessToken!;
   }
 

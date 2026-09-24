@@ -56,6 +56,12 @@ class TeamleaderAuth {
     tokenFile;
     /** Legacy cache location (bare home dir, default permissions). */
     legacyTokenFile;
+    /**
+     * In-flight refresh, shared by concurrent callers. Teamleader rotates the
+     * refresh token on every use, so two parallel refreshes would have the
+     * second one send an already-invalidated token.
+     */
+    refreshing = null;
     constructor(config) {
         this.config = { ...config };
         this.seed = accountKey(config.clientId, config.refreshToken);
@@ -70,7 +76,10 @@ class TeamleaderAuth {
         if (this.isTokenValid()) {
             return this.config.accessToken;
         }
-        await this.refreshAccessToken();
+        this.refreshing ??= this.refreshAccessToken().finally(() => {
+            this.refreshing = null;
+        });
+        await this.refreshing;
         return this.config.accessToken;
     }
     /** Get the current refresh token (may have been rotated). */
