@@ -292,6 +292,7 @@ export function registerQuotationTools(
     "teamleader_delete_quotation",
     "Delete a quotation. This is irreversible.",
     { id: z.string().describe("The quotation ID to delete") },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "quotations.delete", body: { id: params.id } });
       return {

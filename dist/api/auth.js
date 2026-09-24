@@ -26,7 +26,15 @@ const path_1 = __importDefault(require("path"));
 const crypto_1 = __importDefault(require("crypto"));
 const TOKEN_URL = "https://focus.teamleader.eu/oauth2/access_token";
 const TOKEN_BUFFER_MS = 60_000; // Refresh 60s before expiry
-const TOKEN_DIR = process.env.APPDATA || process.env.HOME || "";
+const HOME_DIR = process.env.APPDATA || process.env.HOME || "";
+/**
+ * Directory holding the token caches. Kept out of the bare home directory and
+ * created private (0700) since the files inside contain a live refresh token.
+ * (Mode bits are ignored on Windows, where APPDATA is already per-user.)
+ */
+const TOKEN_DIR = process.env.APPDATA
+    ? path_1.default.join(process.env.APPDATA, "teamleader-mcp")
+    : path_1.default.join(process.env.XDG_CONFIG_HOME || path_1.default.join(HOME_DIR, ".config"), "teamleader-mcp");
 /**
  * Stable identifier for the configured account. Derived from the client id and
  * the *configured* refresh token (the one from the environment, which does not
@@ -46,10 +54,14 @@ class TeamleaderAuth {
     seed;
     /** Per-account cache file path. */
     tokenFile;
+    /** Legacy cache location (bare home dir, default permissions). */
+    legacyTokenFile;
     constructor(config) {
         this.config = { ...config };
         this.seed = accountKey(config.clientId, config.refreshToken);
-        this.tokenFile = path_1.default.join(TOKEN_DIR, `teamleader-mcp-token.${this.seed}.json`);
+        const fileName = `teamleader-mcp-token.${this.seed}.json`;
+        this.tokenFile = path_1.default.join(TOKEN_DIR, fileName);
+        this.legacyTokenFile = path_1.default.join(HOME_DIR, fileName);
         console.error(`[TeamleaderAuth] account ${this.seed} — token cache: ${this.tokenFile}`);
         this.loadTokenFromDisk();
     }
@@ -77,9 +89,13 @@ class TeamleaderAuth {
     }
     loadTokenFromDisk() {
         try {
-            if (!fs_1.default.existsSync(this.tokenFile))
+            // Teamleader rotates refresh tokens, so the cached copy may be the only
+            // valid one. Fall back to the legacy location and migrate it.
+            const migrating = !fs_1.default.existsSync(this.tokenFile) && fs_1.default.existsSync(this.legacyTokenFile);
+            const source = migrating ? this.legacyTokenFile : this.tokenFile;
+            if (!fs_1.default.existsSync(source))
                 return;
-            const saved = JSON.parse(fs_1.default.readFileSync(this.tokenFile, "utf-8"));
+            const saved = JSON.parse(fs_1.default.readFileSync(source, "utf-8"));
             // Only trust a cache that belongs to THIS account. This guards against a
             // stale file (e.g. reused filename) overriding a freshly configured token.
             if (saved.seed && saved.seed !== this.seed) {
@@ -93,6 +109,11 @@ class TeamleaderAuth {
             if (saved.tokenExpiresAt)
                 this.config.tokenExpiresAt = saved.tokenExpiresAt;
             console.error(`[TeamleaderAuth] Loaded cached tokens for this account.`);
+            if (migrating) {
+                this.saveTokenToDisk();
+                if (fs_1.default.existsSync(this.tokenFile))
+                    fs_1.default.rmSync(this.legacyTokenFile, { force: true });
+            }
         }
         catch (err) {
             console.error(`[TeamleaderAuth] Could not load tokens from disk: ${err}`);
@@ -100,12 +121,15 @@ class TeamleaderAuth {
     }
     saveTokenToDisk() {
         try {
+            fs_1.default.mkdirSync(TOKEN_DIR, { recursive: true, mode: 0o700 });
             fs_1.default.writeFileSync(this.tokenFile, JSON.stringify({
                 seed: this.seed,
                 refreshToken: this.config.refreshToken,
                 accessToken: this.config.accessToken,
                 tokenExpiresAt: this.config.tokenExpiresAt,
-            }), "utf-8");
+            }), { encoding: "utf-8", mode: 0o600 });
+            // `mode` only applies when the file is created; tighten an existing one.
+            fs_1.default.chmodSync(this.tokenFile, 0o600);
         }
         catch (err) {
             console.error(`[TeamleaderAuth] Could not save tokens to disk: ${err}`);

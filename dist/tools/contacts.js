@@ -156,7 +156,7 @@ function registerContactTools(server, client) {
     // ── Delete Contact ─────────────────────────────────────────────────────────
     server.tool("teamleader_delete_contact", "Delete a contact from Teamleader Focus. This is irreversible.", {
         id: zod_1.z.string().describe("The contact ID to delete"),
-    }, async (params) => {
+    }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "contacts.delete", body: { id: params.id } });
         return {
             content: [

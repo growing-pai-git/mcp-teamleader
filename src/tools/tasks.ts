@@ -249,6 +249,7 @@ export function registerTaskTools(
     "teamleader_delete_task",
     "Delete a task. This is irreversible.",
     { id: z.string().describe("The task ID to delete") },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "tasks.delete", body: { id: params.id } });
       return {

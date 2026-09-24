@@ -185,7 +185,7 @@ function registerTimeTrackingTools(server, client) {
         };
     });
     // ── Delete Time Tracking Entry ───────────────────────────────────────────
-    server.tool("teamleader_delete_time_tracking", "Delete a time-tracking entry. This is irreversible.", { id: zod_1.z.string().describe("The time tracking entry ID to delete") }, async (params) => {
+    server.tool("teamleader_delete_time_tracking", "Delete a time-tracking entry. This is irreversible.", { id: zod_1.z.string().describe("The time tracking entry ID to delete") }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "timeTracking.delete", body: { id: params.id } });
         return {
             content: [

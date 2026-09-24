@@ -345,6 +345,7 @@ export function registerInvoiceTools(
     {
       id: z.string().describe("The invoice ID to delete"),
     },
+    { destructiveHint: true },
     async (params) => {
       await client.request({
         endpoint: "invoices.delete",

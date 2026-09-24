@@ -22,7 +22,19 @@ import type { TeamleaderAuthConfig, TokenResponse } from "../types/index.js";
 
 const TOKEN_URL = "https://focus.teamleader.eu/oauth2/access_token";
 const TOKEN_BUFFER_MS = 60_000; // Refresh 60s before expiry
-const TOKEN_DIR = process.env.APPDATA || process.env.HOME || "";
+const HOME_DIR = process.env.APPDATA || process.env.HOME || "";
+
+/**
+ * Directory holding the token caches. Kept out of the bare home directory and
+ * created private (0700) since the files inside contain a live refresh token.
+ * (Mode bits are ignored on Windows, where APPDATA is already per-user.)
+ */
+const TOKEN_DIR = process.env.APPDATA
+  ? path.join(process.env.APPDATA, "teamleader-mcp")
+  : path.join(
+      process.env.XDG_CONFIG_HOME || path.join(HOME_DIR, ".config"),
+      "teamleader-mcp"
+    );
 
 /**
  * Stable identifier for the configured account. Derived from the client id and
@@ -44,11 +56,15 @@ export class TeamleaderAuth {
   private readonly seed: string;
   /** Per-account cache file path. */
   private readonly tokenFile: string;
+  /** Legacy cache location (bare home dir, default permissions). */
+  private readonly legacyTokenFile: string;
 
   constructor(config: TeamleaderAuthConfig) {
     this.config = { ...config };
     this.seed = accountKey(config.clientId, config.refreshToken);
-    this.tokenFile = path.join(TOKEN_DIR, `teamleader-mcp-token.${this.seed}.json`);
+    const fileName = `teamleader-mcp-token.${this.seed}.json`;
+    this.tokenFile = path.join(TOKEN_DIR, fileName);
+    this.legacyTokenFile = path.join(HOME_DIR, fileName);
     console.error(
       `[TeamleaderAuth] account ${this.seed} — token cache: ${this.tokenFile}`
     );
@@ -83,8 +99,13 @@ export class TeamleaderAuth {
 
   private loadTokenFromDisk(): void {
     try {
-      if (!fs.existsSync(this.tokenFile)) return;
-      const saved = JSON.parse(fs.readFileSync(this.tokenFile, "utf-8"));
+      // Teamleader rotates refresh tokens, so the cached copy may be the only
+      // valid one. Fall back to the legacy location and migrate it.
+      const migrating =
+        !fs.existsSync(this.tokenFile) && fs.existsSync(this.legacyTokenFile);
+      const source = migrating ? this.legacyTokenFile : this.tokenFile;
+      if (!fs.existsSync(source)) return;
+      const saved = JSON.parse(fs.readFileSync(source, "utf-8"));
 
       // Only trust a cache that belongs to THIS account. This guards against a
       // stale file (e.g. reused filename) overriding a freshly configured token.
@@ -99,6 +120,11 @@ export class TeamleaderAuth {
       if (saved.accessToken) this.config.accessToken = saved.accessToken;
       if (saved.tokenExpiresAt) this.config.tokenExpiresAt = saved.tokenExpiresAt;
       console.error(`[TeamleaderAuth] Loaded cached tokens for this account.`);
+
+      if (migrating) {
+        this.saveTokenToDisk();
+        if (fs.existsSync(this.tokenFile)) fs.rmSync(this.legacyTokenFile, { force: true });
+      }
     } catch (err) {
       console.error(`[TeamleaderAuth] Could not load tokens from disk: ${err}`);
     }
@@ -106,6 +132,7 @@ export class TeamleaderAuth {
 
   private saveTokenToDisk(): void {
     try {
+      fs.mkdirSync(TOKEN_DIR, { recursive: true, mode: 0o700 });
       fs.writeFileSync(
         this.tokenFile,
         JSON.stringify({
@@ -114,8 +141,10 @@ export class TeamleaderAuth {
           accessToken: this.config.accessToken,
           tokenExpiresAt: this.config.tokenExpiresAt,
         }),
-        "utf-8"
+        { encoding: "utf-8", mode: 0o600 }
       );
+      // `mode` only applies when the file is created; tighten an existing one.
+      fs.chmodSync(this.tokenFile, 0o600);
     } catch (err) {
       console.error(`[TeamleaderAuth] Could not save tokens to disk: ${err}`);
     }

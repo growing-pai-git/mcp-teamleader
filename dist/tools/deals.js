@@ -298,7 +298,7 @@ function registerDealTools(server, client) {
     // ── Delete Deal ────────────────────────────────────────────────────────────
     server.tool("teamleader_delete_deal", "Delete a deal from Teamleader Focus. This is irreversible.", {
         id: zod_1.z.string().describe("The deal ID to delete"),
-    }, async (params) => {
+    }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "deals.delete", body: { id: params.id } });
         return {
             content: [

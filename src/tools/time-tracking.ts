@@ -219,6 +219,7 @@ export function registerTimeTrackingTools(
     "teamleader_delete_time_tracking",
     "Delete a time-tracking entry. This is irreversible.",
     { id: z.string().describe("The time tracking entry ID to delete") },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "timeTracking.delete", body: { id: params.id } });
       return {

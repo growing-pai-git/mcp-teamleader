@@ -190,6 +190,7 @@ export function registerContactTools(
     {
       id: z.string().describe("The contact ID to delete"),
     },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "contacts.delete", body: { id: params.id } });
       return {

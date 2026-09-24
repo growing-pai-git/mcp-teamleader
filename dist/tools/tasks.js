@@ -205,7 +205,7 @@ function registerTaskTools(server, client) {
             ],
         };
     });
-    server.tool("teamleader_delete_task", "Delete a task. This is irreversible.", { id: zod_1.z.string().describe("The task ID to delete") }, async (params) => {
+    server.tool("teamleader_delete_task", "Delete a task. This is irreversible.", { id: zod_1.z.string().describe("The task ID to delete") }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "tasks.delete", body: { id: params.id } });
         return {
             content: [

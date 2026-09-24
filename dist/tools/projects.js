@@ -516,7 +516,7 @@ function registerProjectTools(server, client, isAdmin) {
             "delete_tasks_unlink_time_trackings",
         ])
             .describe("What to do with linked tasks and time trackings on delete"),
-    }, async (params) => {
+    }, { destructiveHint: true }, async (params) => {
         await client.request({
             endpoint: "projects-v2/projects.delete",
             body: { id: params.id, delete_strategy: params.delete_strategy },

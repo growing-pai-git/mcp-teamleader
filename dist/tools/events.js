@@ -186,7 +186,7 @@ function registerEventTools(server, client) {
     // ── Cancel Event ───────────────────────────────────────────────────────────
     server.tool("teamleader_cancel_event", "Cancel a calendar event for all attendees.", {
         id: zod_1.z.string().describe("The event ID to cancel"),
-    }, async (params) => {
+    }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "events.cancel", body: { id: params.id } });
         return {
             content: [

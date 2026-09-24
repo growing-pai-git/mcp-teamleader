@@ -363,6 +363,7 @@ export function registerDealTools(
     {
       id: z.string().describe("The deal ID to delete"),
     },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "deals.delete", body: { id: params.id } });
       return {

@@ -240,7 +240,7 @@ function registerQuotationTools(server, client) {
         };
     });
     // ── Delete Quotation ─────────────────────────────────────────────────────
-    server.tool("teamleader_delete_quotation", "Delete a quotation. This is irreversible.", { id: zod_1.z.string().describe("The quotation ID to delete") }, async (params) => {
+    server.tool("teamleader_delete_quotation", "Delete a quotation. This is irreversible.", { id: zod_1.z.string().describe("The quotation ID to delete") }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "quotations.delete", body: { id: params.id } });
         return {
             content: [

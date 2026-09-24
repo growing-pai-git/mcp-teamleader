@@ -276,7 +276,7 @@ function registerInvoiceTools(server, client) {
     // ── Delete Invoice ─────────────────────────────────────────────────────────
     server.tool("teamleader_delete_invoice", "Delete an invoice in Teamleader Focus. Only possible for draft invoices or the last booked invoice. This is irreversible.", {
         id: zod_1.z.string().describe("The invoice ID to delete"),
-    }, async (params) => {
+    }, { destructiveHint: true }, async (params) => {
         await client.request({
             endpoint: "invoices.delete",
             body: { id: params.id },

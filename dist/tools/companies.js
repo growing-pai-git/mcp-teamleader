@@ -160,7 +160,7 @@ function registerCompanyTools(server, client) {
     // ── Delete Company ─────────────────────────────────────────────────────────
     server.tool("teamleader_delete_company", "Delete a company from Teamleader Focus. This is irreversible.", {
         id: zod_1.z.string().describe("The company ID to delete"),
-    }, async (params) => {
+    }, { destructiveHint: true }, async (params) => {
         await client.request({ endpoint: "companies.delete", body: { id: params.id } });
         return {
             content: [

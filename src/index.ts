@@ -81,7 +81,7 @@ async function main(): Promise<void> {
   // Create MCP server
   const server = new McpServer({
     name: "teamleader",
-    version: "1.0.0",
+    version: "1.0.1",
     description:
       "MCP server for Teamleader Focus CRM — manage contacts, companies, deals, tasks, events, invoices, and projects.",
   });

@@ -606,6 +606,7 @@ export function registerProjectTools(
         ])
         .describe("What to do with linked tasks and time trackings on delete"),
     },
+    { destructiveHint: true },
     async (params) => {
       await client.request({
         endpoint: "projects-v2/projects.delete",

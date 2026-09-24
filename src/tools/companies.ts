@@ -192,6 +192,7 @@ export function registerCompanyTools(
     {
       id: z.string().describe("The company ID to delete"),
     },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "companies.delete", body: { id: params.id } });
       return {

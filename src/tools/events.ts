@@ -222,6 +222,7 @@ export function registerEventTools(
     {
       id: z.string().describe("The event ID to cancel"),
     },
+    { destructiveHint: true },
     async (params) => {
       await client.request({ endpoint: "events.cancel", body: { id: params.id } });
       return {

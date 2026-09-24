@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "growing-pai-mcp-teamleader",
   "display_name": "Growing pAI — Teamleader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "MCP server for Teamleader Focus CRM — manage contacts, companies, deals, tasks, events, invoices, quotations, projects and time tracking.",
   "long_description": "Connects Claude to Teamleader Focus CRM. Each installer supplies their own Teamleader OAuth credentials (client ID, client secret, refresh token) — no credentials are bundled in this extension. Optionally unlock deals, invoices and quotations by setting an admin passphrase, and override financial defaults (ledger account, product category) used when creating invoices.",
   "author": {

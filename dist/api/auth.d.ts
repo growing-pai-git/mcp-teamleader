@@ -28,6 +28,8 @@ export declare class TeamleaderAuth {
     private readonly seed;
     /** Per-account cache file path. */
     private readonly tokenFile;
+    /** Legacy cache location (bare home dir, default permissions). */
+    private readonly legacyTokenFile;
     constructor(config: TeamleaderAuthConfig);
     /** Get a valid access token, refreshing if necessary. */
     getAccessToken(): Promise<string>;
