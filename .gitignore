@@ -1,0 +1,7 @@
+node_modules/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+loadEnv.ps1
+.claude/settings.local.json

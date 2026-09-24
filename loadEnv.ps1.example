@@ -1,0 +1,18 @@
+# Dev helper: load your Teamleader OAuth credentials into the current
+# PowerShell session, then run `node dist/index.js` manually.
+# NOTE: the server reads these from the environment. When launched by Claude
+# Desktop, credentials come from the "env" block in claude_desktop_config.json,
+# NOT from this file or from .env.
+#
+# Copy this to loadEnv.ps1 (gitignored) and fill in your own values — get a
+# refresh token via `node scripts/get-refresh-token.mjs` (see README.md).
+$env:TEAMLEADER_CLIENT_ID="YOUR_CLIENT_ID"
+$env:TEAMLEADER_CLIENT_SECRET="YOUR_CLIENT_SECRET"
+$env:TEAMLEADER_REFRESH_TOKEN="YOUR_REFRESH_TOKEN"
+
+$env:ADMIN="PSWD"
+
+# Only needed for scripts/check-rekening-default.mjs:
+# $env:TEST_CUSTOMER_ID="YOUR_TEST_CUSTOMER_ID"
+# $env:TEST_DEPARTMENT_ID="YOUR_TEST_DEPARTMENT_ID"
+# $env:TEST_TAX_RATE_ID="YOUR_TEST_TAX_RATE_ID"
