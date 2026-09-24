@@ -1,6 +1,6 @@
 {
   "name": "growing-pai-mcp-teamleader",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "MCP server for Teamleader Focus CRM - manage contacts, companies, deals, tasks, events, and invoices",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

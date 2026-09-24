@@ -71,7 +71,7 @@ async function main() {
     // Create MCP server
     const server = new mcp_js_1.McpServer({
         name: "teamleader",
-        version: "1.0.1",
+        version: "1.0.2",
         description: "MCP server for Teamleader Focus CRM — manage contacts, companies, deals, tasks, events, invoices, and projects.",
     });
     // Only the correct secret unlocks financially sensitive tools (invoices,
